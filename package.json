@@ -60,7 +60,8 @@
     "gulp-uglify": "^3.0.2",
     "gulp-useref": "^5.0.0",
     "nice-try": "^3.0.0",
-    "uglify-save-license": "^0.4.1"
+    "uglify-save-license": "^0.4.1",
+    "wrangler": "^4.126.0"
   },
   "name": "ariang",
   "description": "AriaNg, a modern web frontend making aria2 easier to use.",
@@ -68,7 +69,8 @@
   "main": "index.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 0",
-    "build": "gulp clean build"
+    "build": "gulp clean build",
+    "deploy": "npm run build && wrangler deploy"
   },
   "browsers": [
     "> 1%",

@@ -1,97 +1,62 @@
-# AriaNg
-[![License](https://img.shields.io/github/license/mayswind/AriaNg.svg?style=flat)](https://github.com/mayswind/AriaNg/blob/master/LICENSE)
-[![Lastest Build](https://img.shields.io/circleci/project/github/mayswind/AriaNg.svg?style=flat)](https://circleci.com/gh/mayswind/AriaNg/tree/master)
-[![Lastest Release](https://img.shields.io/github/release/mayswind/AriaNg.svg?style=flat)](https://github.com/mayswind/AriaNg/releases)
+# AriaNg Workers
 
-## Introduction
-AriaNg is a modern web frontend making [aria2](https://github.com/aria2/aria2) easier to use. AriaNg is written in pure html & javascript, thus it does not need any compilers or runtime environment. You can just put AriaNg in your web server and open it in your browser. AriaNg uses responsive layout, and supports any desktop or mobile devices.
+这是一个用于 Cloudflare Workers Static Assets 的 AriaNg 前端部署仓库。
 
-## Features
-1. Pure Html & Javascript, no runtime required
-2. Responsive design, supporting desktop and mobile devices
-3. User-friendly interface
-    * Sort tasks (by name, size, progress, remaining time, download speed, etc.), files, bittorrent peers
-    * Search tasks
-    * Retry tasks
-    * Adjust task order by dragging
-    * More information of tasks (health percentage, client information of bt peers, etc.)
-    * Filter files by specified file types (videos, audios, pictures, documents, applications, archives, etc.) or file extensions
-    * Tree view for multi-directory task
-    * Download / upload speed chart for aria2 or single task
-    * Full support for aria2 settings
-4. Dark theme
-5. Url command line api support
-6. Download finished notification
-7. Multi-languages support
-8. Multi aria2 RPC host support
-9. Exporting and Importing settings support
-10. Less bandwidth usage, only requesting incremental data
+本仓库只托管 Web 前端，不包含 aria2 下载服务。部署完成后，需要在其他服务器、NAS 或 Docker 容器中运行 aria2，并在页面设置中填写 aria2 的 RPC 地址。
 
-## Screenshots
-#### Desktop
-![AriaNg](https://raw.githubusercontent.com/mayswind/AriaNg-WebSite/master/screenshots/desktop.png)
-#### Mobile Device
-![AriaNg](https://raw.githubusercontent.com/mayswind/AriaNg-WebSite/master/screenshots/mobile.png)
+## Cloudflare Workers 部署
 
-## Installation
-AriaNg now provides three versions, standard version, all-in-one version and [AriaNg Native](https://github.com/mayswind/AriaNg-Native). Standard version is suitable for deployment in the web server, and provides on-demand loading. All-In-One version is suitable for local using, and you can download it and just open the only html file in browser. [AriaNg Native](https://github.com/mayswind/AriaNg-Native) is also suitable for local using, and is no need for browser. 
+本仓库已经包含 `wrangler.toml`，并配置了 `dist/` 作为静态资源目录。
 
-#### Prebuilt release
-Latest Release: [https://github.com/mayswind/AriaNg/releases](https://github.com/mayswind/AriaNg/releases)
+通过 Cloudflare 的 Git 集成部署时使用以下配置：
 
-Latest Daily Build (Standard Version): [https://github.com/mayswind/AriaNg-DailyBuild/archive/master.zip](https://github.com/mayswind/AriaNg-DailyBuild/archive/master.zip)
+```text
+构建命令：npm run build
+部署命令：npx wrangler deploy
+根目录：/
+```
 
-#### Building from source
-Make sure you have [Node.js](https://nodejs.org/), [NPM](https://www.npmjs.com/) and [Gulp](https://gulpjs.com/) installed. Then download the source code, and follow these steps.
+也可以在本地部署：
 
-##### Standard Version
+```bash
+npm ci
+npm run build
+npx wrangler login
+npx wrangler deploy
+```
 
-    $ npm install
-    $ gulp clean build
+构建结果会生成在 `dist/`，该目录已被 Git 忽略，不需要提交到仓库。
 
-##### All-In-One Version
+## aria2 RPC 配置
 
-    $ npm install
-    $ gulp clean build-bundle
+AriaNg 运行在浏览器中，因此浏览器必须能够访问 aria2 RPC 服务。例如：
 
-The builds will be placed in the dist directory.
+```text
+HTTP： http://aria2.example.com/jsonrpc
+HTTPS： https://aria2.example.com/jsonrpc
+WebSocket： ws://aria2.example.com/jsonrpc
+安全 WebSocket： wss://aria2.example.com/jsonrpc
+```
 
-#### Usage Notes
-Since AriaNg standard version loads language resources asynchronously, you may not open index.html directly on the local file system to run AriaNg. It is recommended that you can use the all-in-one version or deploy AriaNg in a web container or download [AriaNg Native](https://github.com/mayswind/AriaNg-Native) that does not require a browser to run.
+如果前端页面使用 HTTPS，RPC 通常也必须使用 HTTPS 或 WSS，否则浏览器会阻止混合内容连接。
 
-## Translating
+建议为 aria2 配置 `rpc-secret`，并通过 Nginx、Cloudflare Tunnel 或其他安全方式暴露 RPC，避免直接公开 aria2 端口。
 
-Everyone is welcome to contribute translations. All translations files are put in `/src/langs/`. You can just modify and commit a new pull request.
+## 上游同步
 
-If you want to translate AriaNg to a new language, you can add language configuration to `/src/scripts/config/languages.js`, then copy `/i18n/en.sample.txt` to `/src/langs/` and rename it to the language code to be translated, then you can start the translation work.
+本仓库基于 [mayswind/AriaNg](https://github.com/mayswind/AriaNg)。GitHub Actions 会定期检查上游 `master` 分支，只有检测到新提交时才会执行同步。
 
-Currently available translations:
+也可以在 GitHub 的 **Actions → Sync upstream AriaNg** 页面手动运行。若上游更新与本仓库的 Workers 配置产生冲突，工作流会停止，等待手动解决。
 
-| Tag | Language | Contributors |
-| --- | --- | --- |
-| cz-CZ | Čeština | [@vorm04](https://github.com/vorm04) |
-| de-DE | Deutsch | [@Malonsow](https://github.com/Malonsow) |
-| en | English | / |
-| es | Español | [@castillofrancodamian](https://github.com/castillofrancodamian) |
-| fr-FR | Français | [@Valaraukar86](https://github.com/Valaraukar86) |
-| it-IT | Italiano | [@ale-saglia](https://github.com/ale-saglia) |
-| ja-JP | 日本語 | [@massangoDa](https://github.com/massangoDa) |
-| pl-PL | Polski | [@Pirania3680](https://github.com/Pirania3680) |
-| ru-RU | Русский | [@gazizovemil](https://github.com/gazizovemil) |
-| zh-Hans | 简体中文 | / |
-| zh-Hant | 繁體中文 | [@zhtw2013](https://github.com/zhtw2013) [@ChiaYen-Kan](https://github.com/ChiaYen-Kan) |
+## 目录说明
 
-Don't see your language? Help us add it!
+| 路径 | 用途 |
+| --- | --- |
+| `src/` | AriaNg 前端源代码 |
+| `dist/` | 构建输出，不提交到 Git |
+| `wrangler.toml` | Cloudflare Workers 配置 |
+| `.github/workflows/` | 上游同步工作流 |
 
-## Documents
-1. [English](http://ariang.mayswind.net)
-2. [Simplified Chinese (简体中文)](http://ariang.mayswind.net/zh_Hans)
+## 许可与归属
 
-## Demo
-Please visit [http://ariang.mayswind.net/latest](http://ariang.mayswind.net/latest)
-
-## Third Party Extensions
-There are some third-party applications based on AriaNg, so you can use AriaNg in more scenarios or devices. Please visit [Third Party Extensions](http://ariang.mayswind.net/3rd-extensions.html) for more information.
-
-## License
-[MIT](https://github.com/mayswind/AriaNg/blob/master/LICENSE)
+AriaNg 原项目由 [mayswind](https://github.com/mayswind) 开发，原项目使用 MIT License。本仓库的修改部分同样遵循 MIT License，具体以 [LICENSE](LICENSE) 文件为准。

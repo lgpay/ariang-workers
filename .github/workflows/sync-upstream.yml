@@ -70,7 +70,7 @@ jobs:
           rm -f package-lock.json
           npm install --package-lock-only
           git add -A
-          git commit --no-edit || true
+          git commit -m "Sync upstream AriaNg" || true
 
       - name: Push updates
         run: git push origin HEAD:master

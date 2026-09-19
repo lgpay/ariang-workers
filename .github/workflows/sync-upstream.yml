@@ -56,7 +56,21 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git remote add upstream https://github.com/mayswind/AriaNg.git
           git fetch upstream master
-          git merge --no-edit upstream/master
+          # 自动合并；package-lock.json 几乎必然冲突，下面单独处理
+          git merge --no-edit upstream/master || true
+          # 若 package.json 冲突（如 version 行），保留 fork 自定义（wrangler / deploy 脚本）
+          if git diff --name-only --diff-filter=U | grep -qx package.json; then
+            git checkout --ours package.json
+          fi
+          # 采用上游版本号写入 package.json（保留 fork 的其余自定义）
+          UPVER=$(git show upstream/master:package.json | jq -r .version)
+          jq --arg v "$UPVER" '.version = $v' package.json > package.json.tmp && mv package.json.tmp package.json
+          # package-lock.json 是自动生成文件，冲突无法简单合并：
+          # 删除后用 npm 依据 package.json 重新生成，自动把 wrangler 加回并保持版本一致
+          rm -f package-lock.json
+          npm install --package-lock-only
+          git add -A
+          git commit --no-edit || true
 
       - name: Push updates
         run: git push origin HEAD:master

@@ -69,6 +69,9 @@ jobs:
           # 删除后用 npm 依据 package.json 重新生成，自动把 wrangler 加回并保持版本一致
           rm -f package-lock.json
           npm install --package-lock-only
+          # 上游工作流只负责 CI/CD，不同步到本仓库
+          git restore --source=HEAD --staged --worktree -- .github/workflows || true
+          git clean -fd -- .github/workflows
           git add -A
           git commit -m "Sync upstream AriaNg" || true
 

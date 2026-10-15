@@ -72,6 +72,8 @@ jobs:
           # 上游工作流只负责 CI/CD，不同步到本仓库
           git restore --source=HEAD --staged --worktree -- .github/workflows || true
           git clean -fd -- .github/workflows
+          # 保留本仓库自己的 Cloudflare Workers 配置
+          git restore --source=HEAD --staged --worktree -- wrangler.toml || true
           git add -A
           git commit -m "Sync upstream AriaNg" || true
 
